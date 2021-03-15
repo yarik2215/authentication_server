@@ -142,3 +142,6 @@ cython_debug/
 
 # VS Code
 .vscode
+
+# sqlite
+*sqlite*

@@ -9,6 +9,7 @@ uvicorn = {extras = ["standard"], version = "*"}
 pip = "*"
 install = "*"
 tortoise-orm = "*"
+aerich = "*"
 
 [dev-packages]
 
