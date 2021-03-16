@@ -7,6 +7,7 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi.security import HTTPBearer
 
 from app import settings
 from app.database import init_db
@@ -15,7 +16,7 @@ from app.models.user import (
     UserLogin,
     UserRegister,
 )
-from fastapi.security import HTTPBearer
+from app.utils.security import create_tokens
 
 
 app = FastAPI()
@@ -56,17 +57,17 @@ async def user_login(request: Request, login_data: UserLogin, Authorize: AuthJWT
     user = await User.get_or_none(domain=domain, email=login_data.email)
     if not ( user and user.verify_password(login_data.password) ):
         raise HTTPException(400, "Wrong credentials.")
-    access_token = Authorize.create_access_token(
-        user.id,
-        user_claims={'domain':domain, 'email':user.email}
-    )
-    refresh_token = Authorize.create_refresh_token(
-        user.id
-    )
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }
+    return create_tokens(Authorize, user.id, domain = domain, email = user.email)
+
+
+@app.get('/refresh', dependencies=[Depends(HTTPBearer())])
+async def get_refresh_token(Authorize: AuthJWT = Depends()):
+    """
+    Use refresh token to update access and refresh token
+    """
+    Authorize.jwt_refresh_token_required()
+    raw_jwt = Authorize.get_raw_jwt()
+    return create_tokens(Authorize, **raw_jwt)
 
 
 @app.get('/api/security_test', dependencies=[Depends(HTTPBearer())])
@@ -77,9 +78,3 @@ async def security_verify_domain(request: Request, Authorize: AuthJWT = Depends(
     if domain != user_domain:
         raise HTTPException(401)
     return {'status': 'success'}
-
-
-@app.get('/users')
-async def user_list():
-    users = await User.all()
-    return users

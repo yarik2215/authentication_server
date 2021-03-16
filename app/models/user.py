@@ -32,9 +32,6 @@ class User(Model):
         return verify_password(raw_password, self.hashed_password)
 
 
-User_Pydantic = pydantic_model_creator(User, name='User')
-
-
 class UserRegister(BaseModel):
     email: EmailStr
     password1: str

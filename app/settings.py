@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class JwtSettings(BaseModel):
     authjwt_secret_key: str = os.environ.get("JWT_SECRET_KEY")
     authjwt_access_token_expires: timedelta = timedelta(hours=24)
+    authjwt_refresh_token_expires: timedelta = timedelta(days=30)
 
 
 # Database settings
