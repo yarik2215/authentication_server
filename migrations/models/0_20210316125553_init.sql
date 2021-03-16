@@ -1,15 +1,16 @@
 -- upgrade --
 CREATE TABLE IF NOT EXISTS "user" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "id" SERIAL NOT NULL PRIMARY KEY,
     "email" VARCHAR(255) NOT NULL,
     "domain" VARCHAR(511) NOT NULL,
     "hashed_password" VARCHAR(511),
-    "created" TIMESTAMP NOT NULL  DEFAULT CURRENT_TIMESTAMP /* Created datetime */,
+    "created" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "uid_user_email_f91910" UNIQUE ("email", "domain")
 );
+COMMENT ON COLUMN "user"."created" IS 'Created datetime';
 CREATE TABLE IF NOT EXISTS "aerich" (
-    "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "id" SERIAL NOT NULL PRIMARY KEY,
     "version" VARCHAR(255) NOT NULL,
     "app" VARCHAR(20) NOT NULL,
-    "content" TEXT NOT NULL
+    "content" JSONB NOT NULL
 );

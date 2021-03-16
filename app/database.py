@@ -8,7 +8,9 @@ def init_db(app: FastAPI) -> None:
     register_tortoise(
         app,
         db_url=settings.DATABASE_URL,
-        modules={"models": ["app.models"]},
+        modules={"models": [
+            *settings.MODELS
+        ]},
         generate_schemas=False,
         add_exception_handlers=True,
     )

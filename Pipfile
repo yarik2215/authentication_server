@@ -10,6 +10,11 @@ pip = "*"
 install = "*"
 tortoise-orm = "*"
 aerich = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+python-jose = {extras = ["cryptography"], version = "*"}
+fastapi-jwt-auth = "*"
+pydantic = {extras = ["email"], version = "*"}
+asyncpg = "*"
 
 [dev-packages]
 

@@ -1,21 +1,36 @@
 import os
+from datetime import timedelta
+from pydantic import BaseModel
 
 
-# secret key
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# JWT
+class JwtSettings(BaseModel):
+    authjwt_secret_key: str = os.environ.get("JWT_SECRET_KEY")
+    authjwt_access_token_expires: timedelta = timedelta(hours=24)
+
 
 # Database settings
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite://db.sqlite")
+
+# list where to look up for models
+MODELS = [
+    "app.models.user"
+]
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 TORTOISE_ORM = {
     "connections": {"default": DATABASE_URL},
     "apps": {
         "models": {
             "models": [
-                "app.models.user",
+                *MODELS,
                 "aerich.models"
             ],
             "default_connection": "default",
         },
     },
 }
+
+
+# password settings
+PASWORD_LENGTH = 4
