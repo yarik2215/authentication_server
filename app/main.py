@@ -15,6 +15,7 @@ from app.models.user import (
     UserLogin,
     UserRegister,
 )
+from fastapi.security import HTTPBearer
 
 
 app = FastAPI()
@@ -67,6 +68,15 @@ async def user_login(request: Request, login_data: UserLogin, Authorize: AuthJWT
         "refresh_token": refresh_token
     }
 
+
+@app.get('/api/security_test', dependencies=[Depends(HTTPBearer())])
+async def security_verify_domain(request: Request, Authorize: AuthJWT = Depends()):
+    domain = request.base_url.hostname
+    Authorize.jwt_required()
+    user_domain = Authorize.get_raw_jwt().get('domain')
+    if domain != user_domain:
+        raise HTTPException(401)
+    return {'status': 'success'}
 
 
 @app.get('/users')
