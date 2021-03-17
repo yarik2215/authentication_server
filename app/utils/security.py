@@ -20,7 +20,7 @@ class JwtTokenPair(BaseModel):
     refresh_token: str
 
 
-def create_tokens(Authorize: AuthJWT, sub: Union[str, int], *, email: str, domain: str) -> JwtTokenPair:
+def create_tokens(Authorize: AuthJWT, sub: Union[str, int], *, email: str, domain: str, **kwargs) -> JwtTokenPair:
     additional_data = {'email': email, 'domain': domain}
     return JwtTokenPair(
         access_token = Authorize.create_access_token(sub, user_claims=additional_data),
