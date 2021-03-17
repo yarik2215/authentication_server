@@ -14,7 +14,7 @@ class JwtSettings(BaseModel):
 
 # list where to look up for models
 MODELS = [
-    "app.models.user"
+    "authentication_service.models.user"
 ]
 
 DATABASE_URL = os.environ.get("DATABASE_URL")

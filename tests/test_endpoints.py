@@ -6,10 +6,10 @@ from fastapi_jwt_auth.auth_jwt import AuthJWT
 from tortoise.contrib.test import finalizer, initializer
 
 
-from app.models.user import User
-from app.main import app
-from app.utils.security import create_tokens
-from app import settings
+from authentication_service.models.user import User
+from authentication_service.main import app
+from authentication_service.utils.security import create_tokens
+from authentication_service import settings
 
 loop = asyncio.get_event_loop()
 

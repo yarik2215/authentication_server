@@ -1,48 +1,41 @@
+from typing import Optional, Dict, Union
 from fastapi import (
-    FastAPI,
     Request,
     HTTPException,
-    Depends
+    Depends,
+    APIRouter
 )
-from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from fastapi.security import HTTPBearer
 
-from app import settings
-from app.database import init_db
-from app.models.user import (
+from authentication_service.models.user import (
     User,
     UserLogin,
     UserRegister,
 )
-from app.utils.security import create_tokens
+from authentication_service.utils.security import create_tokens
 
 
-app = FastAPI()
-# initialize database
-init_db(app)
+router = APIRouter()
 
+# custom types
+RawJwt = Optional[Dict[str,Union[str,int,bool]]]
 
-# callback to get your configuration
-@AuthJWT.load_config
-def get_config():
-    return settings.JwtSettings()
+def verify_token_and_domain(request: Request, Authorize: AuthJWT = Depends(), dummy = Depends(HTTPBearer())) -> RawJwt:
+    """
+    Check JWT access token and domain, if domain from request anf from token are equal, than pass the validation.
+    Argument dummy needs only for generating the documentation.
+    """
+    domain = request.base_url.hostname
+    Authorize.jwt_required()
+    raw_jwt = Authorize.get_raw_jwt()
+    user_domain = raw_jwt.get('domain')
+    if domain != user_domain:
+        raise HTTPException(401)
+    return raw_jwt
 
-
-# Exception handlers
-
-@app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exception: AuthJWTException):
-    return JSONResponse(
-        status_code=exception.status_code,
-        content={"detail": exception.message}
-    )
-
-
-# add endpoints here
-
-@app.post('/register')
+@router.post('/register')
 async def user_register(request: Request, user_data: UserRegister):
     domain = request.base_url.hostname
     user = User(**user_data.dict(), domain=domain)
@@ -51,7 +44,7 @@ async def user_register(request: Request, user_data: UserRegister):
     return
 
 
-@app.post('/login')
+@router.post('/login')
 async def user_login(request: Request, login_data: UserLogin, Authorize: AuthJWT = Depends()):
     domain = request.base_url.hostname
     user = await User.get_or_none(domain=domain, email=login_data.email)
@@ -60,7 +53,7 @@ async def user_login(request: Request, login_data: UserLogin, Authorize: AuthJWT
     return create_tokens(Authorize, user.id, domain = domain, email = user.email)
 
 
-@app.get('/refresh', dependencies=[Depends(HTTPBearer())])
+@router.get('/refresh', dependencies=[Depends(HTTPBearer())])
 async def get_refresh_token(Authorize: AuthJWT = Depends()):
     """
     Use refresh token to update access and refresh token
@@ -70,11 +63,6 @@ async def get_refresh_token(Authorize: AuthJWT = Depends()):
     return create_tokens(Authorize, **raw_jwt)
 
 
-@app.get('/api/security_test', dependencies=[Depends(HTTPBearer())])
-async def security_verify_domain(request: Request, Authorize: AuthJWT = Depends()):
-    domain = request.base_url.hostname
-    Authorize.jwt_required()
-    user_domain = Authorize.get_raw_jwt().get('domain')
-    if domain != user_domain:
-        raise HTTPException(401)
+@router.get('/api/security_test')
+async def security_verify_domain(raw_token: RawJwt = Depends(verify_token_and_domain)):    
     return {'status': 'success'}

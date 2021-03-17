@@ -3,8 +3,8 @@ from tortoise.fields import data
 from tortoise.contrib.pydantic import pydantic_model_creator
 from pydantic import BaseModel, EmailStr, validator
 
-from app import settings
-from app.utils.security import hash_password, verify_password
+from authentication_service import settings
+from authentication_service.utils.security import hash_password, verify_password
 
 
 class User(Model):
