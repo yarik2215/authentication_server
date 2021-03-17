@@ -22,3 +22,8 @@ asynctest = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+start = "uvicorn app.main:app --reload"
+test = "python -m unittest"
+migrate = "aerich upgrade"
