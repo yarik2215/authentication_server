@@ -47,7 +47,7 @@ async def user_register(request: Request, user_data: UserRegister):
     domain = request.base_url.hostname
     user = User(**user_data.dict(), domain=domain)
     user.set_password(user_data.password2)
-    user = await user.save()
+    await user.save()
     return
 
 
