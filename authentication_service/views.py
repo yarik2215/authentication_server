@@ -41,7 +41,6 @@ async def user_register(request: Request, user_data: UserRegister):
     user = User(**user_data.dict(), domain=domain)
     user.set_password(user_data.password2)
     await user.save()
-    return
 
 
 @router.post('/login')
